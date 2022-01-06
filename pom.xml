@@ -16,10 +16,6 @@
 	<name>proman</name>
 	<description>ProMan is a application for managing projects</description>
 
-	<properties>
-		<java.version>11</java.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
