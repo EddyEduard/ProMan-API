@@ -49,11 +49,7 @@ public class AccountService implements UserDetailsService {
 		Account foundAccount = findById(id);
 		foundAccount.setUsername(account.getUsername());
 		foundAccount.setEmail(account.getEmail());
-		foundAccount.setCountry(account.getCountry());
-		foundAccount.setIndustry(account.getIndustry());
-		foundAccount.setCompany(account.getCompany());
 		foundAccount.setPhone(account.getPhone());
-		foundAccount.setTeam_size(account.getTeam_size());
 
 		if (!BCrypt.checkpw(account.getPassword(), foundAccount.getPassword()))
 			foundAccount.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()));
