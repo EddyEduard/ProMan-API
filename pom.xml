@@ -14,7 +14,7 @@
 	<artifactId>proman</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>proman</name>
-	<description>ProMan is a application for managing projects</description>
+	<description>ProMan is an application for managing projects</description>
 
 	<dependencies>
 		<dependency>
