@@ -1,6 +1,8 @@
 package com.team.proman.controller.rest;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,10 +27,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team.proman.component.JwtToken;
 import com.team.proman.model.AccountModel;
+import com.team.proman.model.CompanyModel;
 import com.team.proman.model.LoginModel;
+import com.team.proman.model.RegisterModel;
 import com.team.proman.model.TokenModel;
 import com.team.proman.model.db.Account;
+import com.team.proman.model.db.AccountRole;
+import com.team.proman.model.db.Company;
+import com.team.proman.model.db.Role;
+import com.team.proman.services.AccountRoleService;
 import com.team.proman.services.AccountService;
+import com.team.proman.services.CompanyService;
+import com.team.proman.services.RoleService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,15 +48,24 @@ public class AuthController {
 	private AccountService accountService;
 
 	@Autowired
+	private CompanyService companyService;
+
+	@Autowired
+	private AccountRoleService accountRoleService;
+
+	@Autowired
+	private RoleService roleService;
+
+	@Autowired
 	private JwtToken jwtTokenUtil;
 
 	/**
 	 * Login user in account.
 	 * 
-	 * @param login 
+	 * @param login
 	 * @param bindingResult
-	 * @return token model 
-	 * */
+	 * @return token model
+	 */
 	@Validated
 	@PostMapping("/login")
 	public ResponseEntity<Object> login(@Valid @RequestBody LoginModel login, BindingResult bindingResult) {
@@ -86,18 +106,40 @@ public class AuthController {
 	 * @param account
 	 * @param bindingResult
 	 * @return created account
-	 * */
+	 */
 	@Validated
 	@PostMapping("/register")
-	public ResponseEntity<Object> register(@Valid @RequestBody AccountModel account, BindingResult bindingResult) {
+	public ResponseEntity<Object> register(@Valid @RequestBody RegisterModel register, BindingResult bindingResult) {
 
 		if (bindingResult.hasErrors())
 			return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
 
 		try {
-			Account newAccount = accountService.create(account.getAccount());
+			AccountModel account = register.getAccount();
+			CompanyModel company = register.getCompany();
 
-			return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
+			Company newCompany = companyService.create(company.getCompany());
+			Account newAccount = accountService.create(account.getAccount(newCompany.getId()));
+			Set<Role> setNewRole = new HashSet<Role>();
+
+			for (String roleName : account.getRoles()) {
+				Role foundRoleByName = roleService.findByName(roleName);
+				if (foundRoleByName != null) {
+					AccountRole accountRole = new AccountRole(newAccount.getId(), foundRoleByName.getId());
+					AccountRole newAccountRole = accountRoleService.create(accountRole);
+					Role foundRoleById = roleService.findById(newAccountRole.getRole_id());
+					if (foundRoleById != null)
+						setNewRole.add(foundRoleById);
+				}
+			}
+
+			newAccount.setRoles(setNewRole);
+
+			HashMap<String, Object> result = new HashMap<String, Object>();
+			result.put("account", newAccount);
+			result.put("company", newCompany);
+
+			return new ResponseEntity<>(result, HttpStatus.CREATED);
 		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
 		}
@@ -108,9 +150,9 @@ public class AuthController {
 	 * 
 	 * @param authentication
 	 * @return account profile
-	 * */
-	@GetMapping("/profile")
-	public ResponseEntity<Object> profile(Authentication authentication) {
+	 */
+	@GetMapping("/profile_account")
+	public ResponseEntity<Object> profile_account(Authentication authentication) {
 		Long id = Long.parseLong(authentication.getName());
 
 		try {
@@ -128,10 +170,11 @@ public class AuthController {
 	 * @param bindingResult
 	 * @param authentication
 	 * @return updated account
-	 * */
+	 */
 	@Validated
-	@PutMapping("/profile")
-	public ResponseEntity<Object> update_profile(@Valid @RequestBody AccountModel account, BindingResult bindingResult,
+	@PutMapping("/profile_account/{company_id}")
+	public ResponseEntity<Object> update_profile_account(@Valid @RequestBody AccountModel account,
+			@PathVariable(required = true, name = "company_id") Long company_id, BindingResult bindingResult,
 			Authentication authentication) {
 		if (bindingResult.hasErrors())
 			return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
@@ -144,10 +187,45 @@ public class AuthController {
 			if (foundAccount == null)
 				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
 
-			Account updateAccount = accountService.update(id, account.getAccount());
+			for (Role role : foundAccount.getRoles()) {
+				Integer existRole = account.getRoles().indexOf(role.getName());
+				if (existRole.equals(-1)) {
+					accountRoleService.deleteByAccountIdAndRoleId(foundAccount.getId(), role.getId());
+				}
+			}
+
+			Set<Role> setNewRole = new HashSet<Role>();
+
+			for (String roleName : account.getRoles()) {
+				Role foundRole = null;
+
+				for (Role role : foundAccount.getRoles()) {
+					if (role.getName().equals(roleName)) {
+						foundRole = role;
+						break;
+					}
+				}
+
+				if (foundRole == null) {
+					Role foundRoleByName = roleService.findByName(roleName);
+					if (foundRoleByName != null) {
+						AccountRole accountRole = new AccountRole(foundAccount.getId(), foundRoleByName.getId());
+						AccountRole newAccountRole = accountRoleService.create(accountRole);
+						Role foundRoleById = roleService.findById(newAccountRole.getRole_id());
+						if (foundRoleById != null)
+							setNewRole.add(foundRoleById);
+					}
+				} else 
+					setNewRole.add(foundRole);
+			}
+
+			Account updateAccount = accountService.update(id, account.getAccount(company_id));
+			updateAccount.setRoles(setNewRole);
 
 			return new ResponseEntity<>(updateAccount, HttpStatus.CREATED);
-		} catch (Exception ex) {
+		} catch (
+
+		Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
 		}
 	}
