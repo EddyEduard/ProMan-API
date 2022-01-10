@@ -27,6 +27,9 @@ public class Account {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@Column(columnDefinition = "INT")
+	private Long company_id;
 
 	@Column(columnDefinition = "VARCHAR", length = 50, nullable = false)
 	private String username;
@@ -34,23 +37,11 @@ public class Account {
 	@Column(columnDefinition = "VARCHAR", unique = true, nullable = false)
 	private String email;
 
-	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
+	@Column(columnDefinition = "VARCHAR", length = 70, nullable = false)
 	private String password;
-
-	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
-	private String country;
-
-	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
-	private String industry;
-
-	@Column(columnDefinition = "TEXT", nullable = false)
-	private String company;
 
 	@Column(columnDefinition = "VARCHAR", length = 12)
 	private String phone;
-
-	@Column(columnDefinition = "INT")
-	private Integer team_size = 0;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(name = "account_roles", joinColumns = { @JoinColumn(name = "account_id") }, inverseJoinColumns = {
@@ -58,25 +49,18 @@ public class Account {
 	private Set<Role> roles;
 
 	/**
+	 * @param companyId
 	 * @param username
 	 * @param email
 	 * @param password
-	 * @param country
-	 * @param industry
-	 * @param company
 	 * @param phone
-	 * @param teamSize
 	 */
-	public Account(String username, String email, String password, String country, String industry, String company,
-			String phone, Integer team_size) {
+	public Account(Long companyId, String username, String email, String password, String phone) {
+		this.company_id = companyId;
 		this.username = username;
 		this.email = email;
 		this.password = password;
-		this.country = country;
-		this.industry = industry;
-		this.company = company;
 		this.phone = phone;
-		this.team_size = team_size;
 	}
 
 	/**
@@ -84,6 +68,13 @@ public class Account {
 	 */
 	public Long getId() {
 		return id;
+	}
+
+	/**
+	 * @return the company_id
+	 */
+	public Long getCompany_id() {
+		return company_id;
 	}
 
 	/**
@@ -129,48 +120,6 @@ public class Account {
 	}
 
 	/**
-	 * @return the country
-	 */
-	public String getCountry() {
-		return country;
-	}
-
-	/**
-	 * @param country the country to set
-	 */
-	public void setCountry(String country) {
-		this.country = country;
-	}
-
-	/**
-	 * @return the industry
-	 */
-	public String getIndustry() {
-		return industry;
-	}
-
-	/**
-	 * @param industry the industry to set
-	 */
-	public void setIndustry(String industry) {
-		this.industry = industry;
-	}
-
-	/**
-	 * @return the company
-	 */
-	public String getCompany() {
-		return company;
-	}
-
-	/**
-	 * @param company the company to set
-	 */
-	public void setCompany(String company) {
-		this.company = company;
-	}
-
-	/**
 	 * @return the phone
 	 */
 	public String getPhone() {
@@ -182,20 +131,6 @@ public class Account {
 	 */
 	public void setPhone(String phone) {
 		this.phone = phone;
-	}
-
-	/**
-	 * @return the team_size
-	 */
-	public Integer getTeam_size() {
-		return team_size;
-	}
-
-	/**
-	 * @param team_size the team_size to set
-	 */
-	public void setTeam_size(Integer team_size) {
-		this.team_size = team_size;
 	}
 
 	/**
