@@ -54,4 +54,23 @@ public class AccountRoleService {
 			}
 		}
 	}
+	
+	/**
+	 * Find an account by account id.
+	 * 
+	 * @param id
+	 * @return found account role or null
+	 */
+	public AccountRole findByAccountId(Long id) {
+		Iterator<AccountRole> accountRoles = accountRoleRepository.findAll().iterator();
+
+		while (accountRoles.hasNext()) {
+			AccountRole accountRole = accountRoles.next();
+			if (accountRole.getAccount_id().equals(id)) {
+				return accountRole;
+			}
+		}
+
+		return null;
+	}
 }
