@@ -3,6 +3,7 @@ package com.team.proman.controller.rest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -10,6 +11,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -17,7 +19,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -101,11 +105,11 @@ public class AuthController {
 	}
 
 	/**
-	 * Register user in account.
+	 * Create a new company profile with account.
 	 * 
-	 * @param account
+	 * @param register
 	 * @param bindingResult
-	 * @return created account
+	 * @return created company profile
 	 */
 	@Validated
 	@PostMapping("/register")
@@ -146,25 +150,114 @@ public class AuthController {
 	}
 
 	/**
-	 * Get profile account.
+	 * Create a new account for a company.
 	 * 
+	 * @param account
+	 * @param company_id
+	 * @param bindingResult
 	 * @param authentication
-	 * @return account profile
+	 * @return created account
 	 */
-	@GetMapping("/profile_account")
-	public ResponseEntity<Object> profile_account(Authentication authentication) {
+	@Validated
+	@PatchMapping("/register")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<Object> register(@Valid @RequestBody AccountModel account, BindingResult bindingResult,
+			Authentication authentication) {
+
+		if (bindingResult.hasErrors())
+			return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+
 		Long id = Long.parseLong(authentication.getName());
 
 		try {
-			Account account = accountService.findById(id);
-			return new ResponseEntity<>(account, HttpStatus.OK);
+			Account foundAccount = accountService.findById(id);
+
+			if (foundAccount == null)
+				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+
+			Company foundCompany = companyService.findById(foundAccount.getCompany_id());
+
+			if (foundCompany == null)
+				return new ResponseEntity<>("There isn't a company with this id.", HttpStatus.NOT_FOUND);
+
+			Account newAccount = accountService.create(account.getAccount(foundAccount.getCompany_id()));
+			Set<Role> setNewRole = new HashSet<Role>();
+
+			for (String roleName : account.getRoles()) {
+				Role foundRoleByName = roleService.findByName(roleName);
+				if (foundRoleByName != null) {
+					AccountRole accountRole = new AccountRole(newAccount.getId(), foundRoleByName.getId());
+					AccountRole newAccountRole = accountRoleService.create(accountRole);
+					Role foundRoleById = roleService.findById(newAccountRole.getRole_id());
+					if (foundRoleById != null)
+						setNewRole.add(foundRoleById);
+				}
+			}
+
+			newAccount.setRoles(setNewRole);
+
+			return new ResponseEntity<>(newAccount, HttpStatus.CREATED);
 		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	/**
-	 * Update profile account.
+	 * Get account profile.
+	 * 
+	 * @param authentication
+	 * @return account profile
+	 */
+	@GetMapping("/account_profile")
+	public ResponseEntity<Object> account_profile(Authentication authentication) {
+		Long id = Long.parseLong(authentication.getName());
+
+		try {
+			Account foundAccount = accountService.findById(id);
+
+			if (foundAccount == null)
+				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+
+			return new ResponseEntity<>(foundAccount, HttpStatus.OK);
+		} catch (Exception ex) {
+			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * Get company profile.
+	 * 
+	 * @param authentication
+	 * @return company profile
+	 */
+	@GetMapping("/company_profile")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<Object> company_profile(Authentication authentication) {
+		Long id = Long.parseLong(authentication.getName());
+
+		try {
+			Account foundAccount = accountService.findById(id);
+
+			if (foundAccount == null)
+				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+
+			Company foundCompany = companyService.findById(foundAccount.getCompany_id());
+
+			if (foundCompany == null)
+				return new ResponseEntity<>("There isn't a company with this id.", HttpStatus.NOT_FOUND);
+
+			HashMap<String, Object> result = new HashMap<String, Object>();
+			result.put("account", foundAccount);
+			result.put("company", foundCompany);
+
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (Exception ex) {
+			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * Update account profile.
 	 * 
 	 * @param account
 	 * @param bindingResult
@@ -172,9 +265,8 @@ public class AuthController {
 	 * @return updated account
 	 */
 	@Validated
-	@PutMapping("/profile_account/{company_id}")
-	public ResponseEntity<Object> update_profile_account(@Valid @RequestBody AccountModel account,
-			@PathVariable(required = true, name = "company_id") Long company_id, BindingResult bindingResult,
+	@PutMapping("/account_profile")
+	public ResponseEntity<Object> account_profile(@Valid @RequestBody AccountModel account, BindingResult bindingResult,
 			Authentication authentication) {
 		if (bindingResult.hasErrors())
 			return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
@@ -215,17 +307,100 @@ public class AuthController {
 						if (foundRoleById != null)
 							setNewRole.add(foundRoleById);
 					}
-				} else 
+				} else
 					setNewRole.add(foundRole);
 			}
 
-			Account updateAccount = accountService.update(id, account.getAccount(company_id));
+			Account updateAccount = accountService.update(id, account.getAccount(foundAccount.getCompany_id()));
 			updateAccount.setRoles(setNewRole);
 
 			return new ResponseEntity<>(updateAccount, HttpStatus.CREATED);
-		} catch (
+		} catch (Exception ex) {
+			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
+		}
+	}
 
-		Exception ex) {
+	/**
+	 * Update company profile.
+	 * 
+	 * @param company
+	 * @param bindingResult
+	 * @param authentication
+	 * @return company profile
+	 */
+	@Validated
+	@PutMapping("/company_profile")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<Object> company_profile(@Valid @RequestBody CompanyModel company, BindingResult bindingResult,
+			Authentication authentication) {
+		if (bindingResult.hasErrors())
+			return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
+
+		Long id = Long.parseLong(authentication.getName());
+
+		try {
+			Account foundAccount = accountService.findById(id);
+
+			if (foundAccount == null)
+				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+
+			Company updatedCompany = companyService.update(foundAccount.getCompany_id(), company.getCompany());
+
+			return new ResponseEntity<>(updatedCompany, HttpStatus.CREATED);
+		} catch (Exception ex) {
+			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * Delete an account profile.
+	 * 
+	 * @param company
+	 * @param authentication
+	 * @return company profile
+	 */
+	@Validated
+	@DeleteMapping("account_profile/{account_id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<Object> account_profile(@PathVariable(required = true, name = "account_id") Long account_id,
+			Authentication authentication) {
+
+		Long id = Long.parseLong(authentication.getName());
+
+		try {
+			Account foundAccount = accountService.findById(account_id);
+
+			if (foundAccount == null)
+				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+
+			if (id.equals(account_id)) {
+				Company foundCompany = companyService.findById(foundAccount.getCompany_id());
+		
+				if (foundCompany == null)
+					return new ResponseEntity<>("There isn't a company with this id.", HttpStatus.NOT_FOUND);
+
+				List<Account> accounts = accountService.selectByCompanyId(foundCompany.getId());
+				
+				for(Account account : accounts) {
+					for (Role role : account.getRoles())
+						accountRoleService.deleteByAccountIdAndRoleId(account.getId(), role.getId());
+
+					accountService.deleteByCompanyId(account.getCompany_id());	
+				}
+				
+				companyService.delete(foundCompany);
+
+				return new ResponseEntity<>("Your account has been deleted.Your company profile has been deleted.",
+						HttpStatus.OK);
+			} else {
+				for (Role role : foundAccount.getRoles())
+					accountRoleService.deleteByAccountIdAndRoleId(foundAccount.getId(), role.getId());
+
+				accountService.delete(foundAccount);
+
+				return new ResponseEntity<>("Your account has been deleted.", HttpStatus.OK);
+			}
+		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
 		}
 	}
