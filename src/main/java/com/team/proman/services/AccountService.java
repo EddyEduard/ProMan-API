@@ -1,7 +1,9 @@
 package com.team.proman.services;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -56,6 +58,31 @@ public class AccountService implements UserDetailsService {
 
 		return accountRepository.save(foundAccount);
 	}
+	
+	/**
+	 * Remove an account by id.
+	 * 
+	 * @param account
+	 */
+	public void delete(Account account) {
+		accountRepository.delete(account);
+	}
+	
+	/**
+	 * Delete an account by company id.
+	 * 
+	 * @param companyId
+	 */
+	public void deleteByCompanyId(Long companyId) {
+		Iterator<Account> accounts = accountRepository.findAll().iterator();
+
+		while (accounts.hasNext()) {
+			Account account = accounts.next();
+			if (account.getCompany_id().equals(companyId)) {
+				accountRepository.delete(account);
+			}
+		}
+	}
 
 	/**
 	 * Find an account by id.
@@ -93,6 +120,26 @@ public class AccountService implements UserDetailsService {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Select accounts by company id.
+	 * 
+	 * @param id
+	 * @return found accounts
+	 */
+	public List<Account> selectByCompanyId(Long id) {
+		List<Account> foundAccounts = new ArrayList<Account>();
+		Iterator<Account> accounts = accountRepository.findAll().iterator();
+
+		while (accounts.hasNext()) {
+			Account account = accounts.next();
+			if (account.getCompany_id().equals(id)) {
+				foundAccounts.add(account);
+			}
+		}
+
+		return foundAccounts;
 	}
 
 	/**
