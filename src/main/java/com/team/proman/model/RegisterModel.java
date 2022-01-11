@@ -1,18 +1,8 @@
 package com.team.proman.model;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 public class RegisterModel {
-	@NotBlank(message = "The account is required.")
-	@NotNull(message = "The account cannot be null.")
-	@NotEmpty(message = "The account cannot be empty.")
 	private AccountModel account;
 	
-	@NotBlank(message = "The company is required.")
-	@NotNull(message = "The company cannot be null.")
-	@NotEmpty(message = "The company cannot be empty.")
 	private CompanyModel company;
 
 	/**
