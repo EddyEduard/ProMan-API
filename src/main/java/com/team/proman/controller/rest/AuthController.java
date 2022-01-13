@@ -398,7 +398,7 @@ public class AuthController {
 
 				accountService.delete(foundAccount);
 
-				return new ResponseEntity<>("Your account has been deleted.", HttpStatus.OK);
+				return new ResponseEntity<>("This account has been deleted.", HttpStatus.OK);
 			}
 		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
