@@ -375,19 +375,19 @@ public class AuthController {
 
 			if (id.equals(account_id)) {
 				Company foundCompany = companyService.findById(foundAccount.getCompany_id());
-		
+
 				if (foundCompany == null)
 					return new ResponseEntity<>("There isn't a company with this id.", HttpStatus.NOT_FOUND);
 
 				List<Account> accounts = accountService.selectByCompanyId(foundCompany.getId());
-				
-				for(Account account : accounts) {
+
+				for (Account account : accounts) {
 					for (Role role : account.getRoles())
 						accountRoleService.deleteByAccountIdAndRoleId(account.getId(), role.getId());
 
-					accountService.deleteByCompanyId(account.getCompany_id());	
+					accountService.deleteByCompanyId(account.getCompany_id());
 				}
-				
+
 				companyService.delete(foundCompany);
 
 				return new ResponseEntity<>("Your account has been deleted.Your company profile has been deleted.",
