@@ -20,6 +20,25 @@ public class CompanyService {
 	}
 	
 	/**
+	 * Find a company by id.
+	 * 
+	 * @param id
+	 * @return found company or null
+	 */
+	public Company findById(Long id) {
+		Iterator<Company> companies = companyRepository.findAll().iterator();
+
+		while (companies.hasNext()) {
+			Company company = companies.next();
+			if (company.getId().equals(id)) {
+				return company;
+			}
+		}
+
+		return null;
+	}
+	
+	/**
 	 * Create a new company profile.
 	 * 
 	 * @param company
@@ -56,24 +75,5 @@ public class CompanyService {
 	 */
 	public void delete(Company company) {
 		companyRepository.delete(company);
-	}
-	
-	/**
-	 * Find a company by id.
-	 * 
-	 * @param id
-	 * @return found company or null
-	 */
-	public Company findById(Long id) {
-		Iterator<Company> companies = companyRepository.findAll().iterator();
-
-		while (companies.hasNext()) {
-			Company company = companies.next();
-			if (company.getId().equals(id)) {
-				return company;
-			}
-		}
-
-		return null;
 	}
 }
