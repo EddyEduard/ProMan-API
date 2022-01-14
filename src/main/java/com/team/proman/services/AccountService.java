@@ -30,61 +30,6 @@ public class AccountService implements UserDetailsService {
 	}
 
 	/**
-	 * Create a new account.
-	 * 
-	 * @param account
-	 * @return created account
-	 */
-	public Account create(Account account) {
-		account.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()));
-		return accountRepository.save(account);
-	}
-
-	/**
-	 * Update an account by id.
-	 * 
-	 * @param id
-	 * @param account
-	 * @return updated account
-	 */
-	public Account update(Long id, Account account) {
-		Account foundAccount = findById(id);
-		foundAccount.setUsername(account.getUsername());
-		foundAccount.setEmail(account.getEmail());
-		foundAccount.setPhone(account.getPhone());
-
-		if (!BCrypt.checkpw(account.getPassword(), foundAccount.getPassword()))
-			foundAccount.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()));
-
-		return accountRepository.save(foundAccount);
-	}
-	
-	/**
-	 * Remove an account by id.
-	 * 
-	 * @param account
-	 */
-	public void delete(Account account) {
-		accountRepository.delete(account);
-	}
-	
-	/**
-	 * Delete an account by company id.
-	 * 
-	 * @param companyId
-	 */
-	public void deleteByCompanyId(Long companyId) {
-		Iterator<Account> accounts = accountRepository.findAll().iterator();
-
-		while (accounts.hasNext()) {
-			Account account = accounts.next();
-			if (account.getCompany_id().equals(companyId)) {
-				accountRepository.delete(account);
-			}
-		}
-	}
-
-	/**
 	 * Find an account by id.
 	 * 
 	 * @param id
@@ -172,6 +117,61 @@ public class AccountService implements UserDetailsService {
 			return new User(foundAccount.getId().toString(), foundAccount.getPassword(), authorities);
 		} else {
 			throw new UsernameNotFoundException("User not found with username: " + username);
+		}
+	}
+	
+	/**
+	 * Create a new account.
+	 * 
+	 * @param account
+	 * @return created account
+	 */
+	public Account create(Account account) {
+		account.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()));
+		return accountRepository.save(account);
+	}
+
+	/**
+	 * Update an account by id.
+	 * 
+	 * @param id
+	 * @param account
+	 * @return updated account
+	 */
+	public Account update(Long id, Account account) {
+		Account foundAccount = findById(id);
+		foundAccount.setUsername(account.getUsername());
+		foundAccount.setEmail(account.getEmail());
+		foundAccount.setPhone(account.getPhone());
+
+		if (!BCrypt.checkpw(account.getPassword(), foundAccount.getPassword()))
+			foundAccount.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()));
+
+		return accountRepository.save(foundAccount);
+	}
+	
+	/**
+	 * Remove an account by id.
+	 * 
+	 * @param account
+	 */
+	public void delete(Account account) {
+		accountRepository.delete(account);
+	}
+	
+	/**
+	 * Delete an account by company id.
+	 * 
+	 * @param companyId
+	 */
+	public void deleteByCompanyId(Long companyId) {
+		Iterator<Account> accounts = accountRepository.findAll().iterator();
+
+		while (accounts.hasNext()) {
+			Account account = accounts.next();
+			if (account.getCompany_id().equals(companyId)) {
+				accountRepository.delete(account);
+			}
 		}
 	}
 }
