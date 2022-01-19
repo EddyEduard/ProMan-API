@@ -14,7 +14,7 @@ public class CompanyModel {
 	@NotBlank(message = "The name is required.")
 	@NotNull(message = "The name cannot be null.")
 	@NotEmpty(message = "The name cannot be empty.")
-	@Size(min = 6, max = 50, message = "The length of name must be between 6 and 50 characters.")
+	@Size(min = 6, max = 250, message = "The length of name must be between 6 and 250 characters.")
 	private String name;
 
 	@NotBlank(message = "The email is required.")
@@ -23,7 +23,7 @@ public class CompanyModel {
 	@Email(message = "The email address is invalid.", flags = { Flag.CASE_INSENSITIVE })
 	private String email;
 
-	@Size(min = 9, max = 12, message = "The length of phone number must be between 9 and 12 digits.")
+	@Size(min = 9, max = 11, message = "The length of phone number must be between 9 and 11 digits.")
 	private String phone;
 
 	@NotBlank(message = "The industry is required.")
