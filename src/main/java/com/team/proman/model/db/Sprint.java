@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.team.proman.model.enums.Priority;
-import com.team.proman.model.enums.Status;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,28 +26,25 @@ public class Sprint {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(columnDefinition = "INT")
 	private Long company_id;
-	
+
 	@Column(columnDefinition = "INT")
 	private Long project_id;
-	
+
 	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String name;
-	
+
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String description;
-	
+
 	@Enumerated(EnumType.STRING)
 	private Priority priority;
-	
-	@Enumerated(EnumType.STRING)
-	private Status status;
-	
+
 	@Column(columnDefinition = "DATETIME", nullable = false)
 	private Date created_date;
-	
+
 	@Column(columnDefinition = "DATETIME", nullable = false)
 	private Date updated_date;
 
@@ -58,18 +54,16 @@ public class Sprint {
 	 * @param name
 	 * @param description
 	 * @param priority
-	 * @param status
 	 * @param created_date
 	 * @param updated_date
 	 */
-	public Sprint(Long company_id, Long project_id, String name, String description, Priority priority, Status status,
+	public Sprint(Long company_id, Long project_id, String name, String description, Priority priority,
 			Date created_date, Date updated_date) {
 		this.company_id = company_id;
 		this.project_id = project_id;
 		this.name = name;
 		this.description = description;
 		this.priority = priority;
-		this.status = status;
 		this.created_date = created_date;
 		this.updated_date = updated_date;
 	}
@@ -149,20 +143,6 @@ public class Sprint {
 	 */
 	public void setPriority(Priority priority) {
 		this.priority = priority;
-	}
-
-	/**
-	 * @return the status
-	 */
-	public Status getStatus() {
-		return status;
-	}
-
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
 	}
 
 	/**
