@@ -121,7 +121,7 @@ public class TaskController {
 	 */
 	@Validated
 	@PostMapping("/create")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> create(@Valid @RequestBody TaskModel task, BindingResult bindingResult,
 			Authentication authentication) {
 
@@ -156,7 +156,7 @@ public class TaskController {
 	 */
 	@Validated
 	@PutMapping("/update/{taskId}")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER', 'ROLE_SPECIALIST')")
 	public ResponseEntity<Object> update(@PathVariable Long taskId, @Valid @RequestBody TaskModel task,
 			BindingResult bindingResult, Authentication authentication) {
 
@@ -193,7 +193,7 @@ public class TaskController {
 	 * @return task
 	 */
 	@DeleteMapping("/delete/{taskId}")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> delete(@PathVariable Long taskId, Authentication authentication) {
 		Long id = Long.parseLong(authentication.getName());
 
