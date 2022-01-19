@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.team.proman.model.ProjectModel;
 import com.team.proman.model.db.Account;
 import com.team.proman.model.db.Project;
-import com.team.proman.model.enums.Status;
 import com.team.proman.services.AccountService;
 import com.team.proman.services.ProjectService;
 
@@ -97,7 +96,7 @@ public class ProjectController {
 	 */
 	@Validated
 	@PostMapping("/create")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> create(@Valid @RequestBody ProjectModel project, BindingResult bindingResult,
 			Authentication authentication) {
 
@@ -113,7 +112,7 @@ public class ProjectController {
 				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
 
 			Project createdProject = projectService
-					.create(project.getProject(foundAccount.getCompany_id(), Status.CREATED, new Date(), new Date()));
+					.create(project.getProject(foundAccount.getCompany_id(), new Date(), new Date()));
 
 			return new ResponseEntity<>(createdProject, HttpStatus.OK);
 		} catch (Exception ex) {
@@ -132,7 +131,7 @@ public class ProjectController {
 	 */
 	@Validated
 	@PutMapping("/update/{projectId}")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> update(@PathVariable Long projectId, @Valid @RequestBody ProjectModel project,
 			BindingResult bindingResult, Authentication authentication) {
 
@@ -152,8 +151,8 @@ public class ProjectController {
 			if (foundProject == null)
 				return new ResponseEntity<>("There isn't a project with this id.", HttpStatus.NOT_FOUND);
 
-			Project updatedProject = projectService.update(projectId, project.getProject(foundAccount.getCompany_id(),
-					project.getStatus(), foundProject.getCreated_date(), new Date()));
+			Project updatedProject = projectService.update(projectId,
+					project.getProject(foundAccount.getCompany_id(), foundProject.getCreated_date(), new Date()));
 
 			return new ResponseEntity<>(updatedProject, HttpStatus.OK);
 		} catch (Exception ex) {
@@ -169,7 +168,7 @@ public class ProjectController {
 	 * @return project
 	 */
 	@DeleteMapping("/delete/{projectId}")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> delete(@PathVariable Long projectId, Authentication authentication) {
 		Long id = Long.parseLong(authentication.getName());
 
