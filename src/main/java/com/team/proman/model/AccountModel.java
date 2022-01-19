@@ -27,10 +27,10 @@ public class AccountModel {
 	@NotBlank(message = "The password is required.")
 	@NotNull(message = "The password cannot be null.")
 	@NotEmpty(message = "The password cannot be empty.")
-	@Size(min = 6, max = 50, message = "The length of password must be between 6 and 50 characters.")
+	@Size(min = 6, max = 70, message = "The length of password must be between 6 and 70 characters.")
 	private String password;
 
-	@Size(min = 9, max = 12, message = "The length of phone number must be between 9 and 12 digits.")
+	@Size(min = 9, max = 11, message = "The length of phone number must be between 9 and 11 digits.")
 	private String phone;
 	
 	private List<String> roles;
