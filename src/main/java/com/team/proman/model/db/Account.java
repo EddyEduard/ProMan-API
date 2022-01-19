@@ -31,7 +31,7 @@ public class Account {
 	@Column(columnDefinition = "INT")
 	private Long company_id;
 
-	@Column(columnDefinition = "VARCHAR", length = 50, nullable = false)
+	@Column(columnDefinition = "VARCHAR", length = 70, nullable = false)
 	private String username;
 
 	@Column(columnDefinition = "VARCHAR", unique = true, nullable = false)
@@ -40,7 +40,7 @@ public class Account {
 	@Column(columnDefinition = "VARCHAR", length = 70, nullable = false)
 	private String password;
 
-	@Column(columnDefinition = "VARCHAR", length = 12)
+	@Column(columnDefinition = "VARCHAR", length = 11)
 	private String phone;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
