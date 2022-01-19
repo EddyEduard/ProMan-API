@@ -39,7 +39,7 @@ public class SprintService {
 
 		return selectSprints;
 	}
-	
+
 	/**
 	 * Find a sprint by project id and his id.
 	 * 
@@ -92,7 +92,6 @@ public class SprintService {
 		foundSprint.setName(sprint.getName());
 		foundSprint.setDescription(sprint.getDescription());
 		foundSprint.setPriority(sprint.getPriority());
-		foundSprint.setStatus(sprint.getStatus());
 		foundSprint.setCreated_date(sprint.getCreated_date());
 		foundSprint.setUpdated_date(sprint.getUpdated_date());
 
