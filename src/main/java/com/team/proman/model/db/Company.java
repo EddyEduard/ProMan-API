@@ -21,25 +21,25 @@ public class Company {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(columnDefinition = "VARCHAR", length = 200, nullable = false)
+	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String name;
 
 	@Column(columnDefinition = "VARCHAR", unique = true, nullable = false)
 	private String email;
 
-	@Column(columnDefinition = "VARCHAR", length = 12)
+	@Column(columnDefinition = "VARCHAR", length = 11)
 	private String phone;
 
-	@Column(columnDefinition = "VARCHAR", length = 200, nullable = false)
+	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String industry;
 
-	@Column(columnDefinition = "VARCHAR", length = 200, nullable = false)
+	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String country;
 
-	@Column(columnDefinition = "VARCHAR", length = 200, nullable = false)
+	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String city;
 
-	@Column(columnDefinition = "VARCHAR", length = 200, nullable = false)
+	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String address;
 
 	/**
