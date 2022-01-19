@@ -9,26 +9,22 @@ import javax.validation.constraints.Size;
 
 import com.team.proman.model.db.Sprint;
 import com.team.proman.model.enums.Priority;
-import com.team.proman.model.enums.Status;
 
 public class SprintModel {
 	private Long projectId;
-	
+
 	@NotBlank(message = "The name is required.")
 	@NotNull(message = "The name cannot be null.")
 	@NotEmpty(message = "The name cannot be empty.")
-	@Size(min = 6, max = 50, message = "The length of name must be between 6 and 250 characters.")
+	@Size(min = 6, max = 250, message = "The length of name must be between 6 and 250 characters.")
 	private String name;
 
 	private String description;
 
 	private Priority priority;
 
-	private Status status;
-
-	public Sprint getSprint(Long companyId, Status status, Date created_date,
-			Date updated_date) {
-		return new Sprint(companyId, this.projectId, this.name, this.description, this.priority, status, created_date,
+	public Sprint getSprint(Long companyId, Date created_date, Date updated_date) {
+		return new Sprint(companyId, this.projectId, this.name, this.description, this.priority, created_date,
 				updated_date);
 	}
 
@@ -38,7 +34,6 @@ public class SprintModel {
 	public Long getProjectId() {
 		return projectId;
 	}
-
 
 	/**
 	 * @param projectId the projectId to set
@@ -87,19 +82,5 @@ public class SprintModel {
 	 */
 	public void setPriority(Priority priority) {
 		this.priority = priority;
-	}
-
-	/**
-	 * @return the status
-	 */
-	public Status getStatus() {
-		return status;
-	}
-
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
 	}
 }
