@@ -19,7 +19,7 @@ public class TaskModel {
 	@NotBlank(message = "The name is required.")
 	@NotNull(message = "The name cannot be null.")
 	@NotEmpty(message = "The name cannot be empty.")
-	@Size(min = 6, max = 50, message = "The length of name must be between 6 and 250 characters.")
+	@Size(min = 6, max = 250, message = "The length of name must be between 6 and 250 characters.")
 	private String name;
 
 	private String description;
@@ -29,7 +29,7 @@ public class TaskModel {
 	private Status status;
 
 	public Task getTask(Long companyId, Status status, Date created_date, Date updated_date) {
-		return new Task(companyId, this.sprintId, this.projectId, this.name, this.description, this.priority, status, created_date,
+		return new Task(companyId, this.projectId, this.sprintId, this.name, this.description, this.priority, status, created_date,
 				updated_date);
 	}
 
