@@ -25,7 +25,6 @@ import com.team.proman.model.SprintModel;
 import com.team.proman.model.db.Account;
 import com.team.proman.model.db.Project;
 import com.team.proman.model.db.Sprint;
-import com.team.proman.model.enums.Status;
 import com.team.proman.services.AccountService;
 import com.team.proman.services.ProjectService;
 import com.team.proman.services.SprintService;
@@ -38,7 +37,7 @@ public class SprintController {
 
 	@Autowired
 	private ProjectService projectService;
-	
+
 	@Autowired
 	private SprintService sprintService;
 
@@ -85,7 +84,7 @@ public class SprintController {
 
 			if (foundAccount == null)
 				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
-			
+
 			Project foundProject = projectService.findById(projectId);
 
 			if (foundProject == null)
@@ -109,7 +108,7 @@ public class SprintController {
 	 */
 	@Validated
 	@PostMapping("/create")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> create(@Valid @RequestBody SprintModel sprint, BindingResult bindingResult,
 			Authentication authentication) {
 
@@ -125,7 +124,7 @@ public class SprintController {
 				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
 
 			Sprint createdSprint = sprintService
-					.create(sprint.getSprint(foundAccount.getCompany_id(), Status.CREATED, new Date(), new Date()));
+					.create(sprint.getSprint(foundAccount.getCompany_id(), new Date(), new Date()));
 
 			return new ResponseEntity<>(createdSprint, HttpStatus.OK);
 		} catch (Exception ex) {
@@ -144,7 +143,7 @@ public class SprintController {
 	 */
 	@Validated
 	@PutMapping("/update/{sprintId}")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> update(@PathVariable Long sprintId, @Valid @RequestBody SprintModel sprint,
 			BindingResult bindingResult, Authentication authentication) {
 
@@ -164,8 +163,8 @@ public class SprintController {
 			if (foundSprint == null)
 				return new ResponseEntity<>("There isn't a sprint with this id.", HttpStatus.NOT_FOUND);
 
-			Sprint updatedSprint = sprintService.update(sprintId, sprint.getSprint(foundAccount.getCompany_id(),
-					sprint.getStatus(), foundSprint.getCreated_date(), new Date()));
+			Sprint updatedSprint = sprintService.update(sprintId,
+					sprint.getSprint(foundAccount.getCompany_id(), foundSprint.getCreated_date(), new Date()));
 
 			return new ResponseEntity<>(updatedSprint, HttpStatus.OK);
 		} catch (Exception ex) {
@@ -181,7 +180,7 @@ public class SprintController {
 	 * @return sprint
 	 */
 	@DeleteMapping("/delete/{sprintId}")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_DIRECTOR', 'ROLE_MANAGER')")
 	public ResponseEntity<Object> delete(@PathVariable Long sprintId, Authentication authentication) {
 		Long id = Long.parseLong(authentication.getName());
 
