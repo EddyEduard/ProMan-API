@@ -4,14 +4,10 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import com.team.proman.model.enums.Status;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,9 +32,6 @@ public class Project {
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String description;
 	
-	@Enumerated(EnumType.STRING)
-	private Status status;
-	
 	@Column(columnDefinition = "DATETIME", nullable = false)
 	private Date created_date;
 	
@@ -49,16 +42,14 @@ public class Project {
 	 * @param company_id
 	 * @param name
 	 * @param description
-	 * @param status
 	 * @param created_date
 	 * @param updated_date
 	 */
-	public Project(Long company_id, String name, String description, Status status, Date created_date,
+	public Project(Long company_id, String name, String description, Date created_date,
 			Date updated_date) {
 		this.company_id = company_id;
 		this.name = name;
 		this.description = description;
-		this.status = status;
 		this.created_date = created_date;
 		this.updated_date = updated_date;
 	}
@@ -110,20 +101,6 @@ public class Project {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	/**
-	 * @return the status
-	 */
-	public Status getStatus() {
-		return status;
-	}
-
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(Status status) {
-		this.status = status;
 	}
 
 	/**
