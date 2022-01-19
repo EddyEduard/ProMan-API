@@ -39,7 +39,7 @@ public class ProjectService {
 
 		return selectProjects;
 	}
-	
+
 	/**
 	 * Find a project by id.
 	 * 
@@ -59,7 +59,7 @@ public class ProjectService {
 	public Project create(Project project) {
 		return this.projectRepository.save(project);
 	}
-	
+
 	/**
 	 * Update a project by id.
 	 * 
@@ -71,13 +71,12 @@ public class ProjectService {
 		Project foundProject = findById(id);
 		foundProject.setName(project.getName());
 		foundProject.setDescription(project.getDescription());
-		foundProject.setStatus(project.getStatus());
 		foundProject.setCreated_date(project.getCreated_date());
 		foundProject.setUpdated_date(project.getUpdated_date());
-		
+
 		return projectRepository.save(foundProject);
 	}
-	
+
 	/**
 	 * Delete a project by id.
 	 * 
