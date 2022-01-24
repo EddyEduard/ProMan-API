@@ -119,14 +119,17 @@ public class AuthController {
 			return new ResponseEntity<>(bindingResult.getAllErrors(), HttpStatus.BAD_REQUEST);
 
 		try {
-			AccountModel account = register.getAccount();
+			String username = register.getUsername();
+			String password = register.getPassword();
+			List<String> roles = register.getRoles();
 			CompanyModel company = register.getCompany();
 
 			Company newCompany = companyService.create(company.getCompany());
-			Account newAccount = accountService.create(account.getAccount(newCompany.getId()));
+			Account account = new Account(newCompany.getId(), username, newCompany.getEmail(), password, newCompany.getPhone());
+			Account newAccount = accountService.create(account);
 			Set<Role> setNewRole = new HashSet<Role>();
 
-			for (String roleName : account.getRoles()) {
+			for (String roleName : roles) {
 				Role foundRoleByName = roleService.findByName(roleName);
 				if (foundRoleByName != null) {
 					AccountRole accountRole = new AccountRole(newAccount.getId(), foundRoleByName.getId());
