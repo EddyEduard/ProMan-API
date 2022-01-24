@@ -26,7 +26,7 @@ import lombok.experimental.Accessors;
 public class Account {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	public Long id;
 	
 	@Column(columnDefinition = "INT")
 	private Long company_id;
