@@ -29,10 +29,8 @@ public class Sprint {
 
 	@Column(columnDefinition = "INT")
 	private Long company_id;
-
 	@Column(columnDefinition = "INT")
 	private Long project_id;
-
 	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String name;
 
