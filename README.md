@@ -12,10 +12,9 @@ All the roots from the REST API are described below.
 
 ```json
 {
-	"account": {
-		"password: "Your password...",
-		"roles: ["ADMIN", "DIRECTOR", "MANAGER"]
-	},
+	"username": "Your username...",
+	"password: "Your password...",
+	"roles: ["ADMIN", "DIRECTOR", "MANAGER"],
 	"company": {
 		"name": "Compnay name...",
         "email": "Company e-mail...",
