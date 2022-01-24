@@ -21,20 +21,20 @@ import lombok.experimental.Accessors;
 public class Project {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
+	public Long id;
+
 	@Column(columnDefinition = "INT")
 	private Long company_id;
-	
+
 	@Column(columnDefinition = "VARCHAR", length = 250, nullable = false)
 	private String name;
-	
+
 	@Column(columnDefinition = "TEXT", nullable = false)
 	private String description;
-	
+
 	@Column(columnDefinition = "DATETIME", nullable = false)
 	private Date created_date;
-	
+
 	@Column(columnDefinition = "DATETIME", nullable = false)
 	private Date updated_date;
 
@@ -45,8 +45,7 @@ public class Project {
 	 * @param created_date
 	 * @param updated_date
 	 */
-	public Project(Long company_id, String name, String description, Date created_date,
-			Date updated_date) {
+	public Project(Long company_id, String name, String description, Date created_date, Date updated_date) {
 		this.company_id = company_id;
 		this.name = name;
 		this.description = description;
@@ -62,7 +61,7 @@ public class Project {
 	}
 
 	/**
-	 * @return the company_id
+	 * @return the id
 	 */
 	public Long getCompany_id() {
 		return company_id;
