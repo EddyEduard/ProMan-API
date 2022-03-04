@@ -24,8 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.team.proman.model.ProjectModel;
 import com.team.proman.model.db.Account;
 import com.team.proman.model.db.Project;
+import com.team.proman.model.db.Sprint;
+import com.team.proman.model.db.Task;
 import com.team.proman.services.AccountService;
 import com.team.proman.services.ProjectService;
+import com.team.proman.services.SprintService;
+import com.team.proman.services.TaskService;
 
 @RestController
 @RequestMapping("/api/project")
@@ -36,6 +40,12 @@ public class ProjectController {
 
 	@Autowired
 	private ProjectService projectService;
+
+	@Autowired
+	private SprintService sprintService;
+
+	@Autowired
+	private TaskService taskService;
 
 	/**
 	 * Get all projects.
@@ -51,7 +61,8 @@ public class ProjectController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			List<Project> projects = projectService.selectByCompanyId(foundAccount.getCompany_id());
 
@@ -76,7 +87,8 @@ public class ProjectController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Project project = projectService.findById(projectId);
 
@@ -109,7 +121,8 @@ public class ProjectController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Project createdProject = projectService
 					.create(project.getProject(foundAccount.getCompany_id(), new Date(), new Date()));
@@ -144,12 +157,14 @@ public class ProjectController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Project foundProject = projectService.findById(projectId);
 
 			if (foundProject == null)
-				return new ResponseEntity<>("There isn't a project with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a project with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Project updatedProject = projectService.update(projectId,
 					project.getProject(foundAccount.getCompany_id(), foundProject.getCreated_date(), new Date()));
@@ -176,16 +191,29 @@ public class ProjectController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Project foundProject = projectService.findById(projectId);
 
 			if (foundProject == null)
-				return new ResponseEntity<>("There isn't a project with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a project with this id." },
+						HttpStatus.NOT_FOUND);
+
+			List<Sprint> foundSprints = sprintService.selectByProjectId(foundProject.getId());
+
+			for (Sprint sprint : foundSprints) {
+				List<Task> foundTasks = taskService.selectByProjectIdAndSprintId(foundProject.getId(), sprint.getId());
+
+				for (Task task : foundTasks)
+					taskService.deleteById(task.getId());
+
+				sprintService.deleteById(sprint.getId());
+			}
 
 			projectService.deleteById(projectId);
 
-			return new ResponseEntity<>("Delete project successfully.", HttpStatus.OK);
+			return new ResponseEntity<>(new String[] { "Delete project successfully." }, HttpStatus.OK);
 		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
 		}

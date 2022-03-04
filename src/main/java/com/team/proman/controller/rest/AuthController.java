@@ -1,5 +1,6 @@
 package com.team.proman.controller.rest;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,7 +9,9 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import org.jasypt.util.text.AES256TextEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team.proman.component.JwtToken;
@@ -38,11 +41,17 @@ import com.team.proman.model.TokenModel;
 import com.team.proman.model.db.Account;
 import com.team.proman.model.db.AccountRole;
 import com.team.proman.model.db.Company;
+import com.team.proman.model.db.Project;
 import com.team.proman.model.db.Role;
+import com.team.proman.model.db.Sprint;
+import com.team.proman.model.db.Task;
 import com.team.proman.services.AccountRoleService;
 import com.team.proman.services.AccountService;
 import com.team.proman.services.CompanyService;
+import com.team.proman.services.ProjectService;
 import com.team.proman.services.RoleService;
+import com.team.proman.services.SprintService;
+import com.team.proman.services.TaskService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -61,7 +70,19 @@ public class AuthController {
 	private RoleService roleService;
 
 	@Autowired
+	private ProjectService projectService;
+
+	@Autowired
+	private SprintService sprintService;
+
+	@Autowired
+	private TaskService taskService;
+
+	@Autowired
 	private JwtToken jwtTokenUtil;
+
+	@Value("${aes.key}")
+	private String aesKey;
 
 	/**
 	 * Login user in account.
@@ -81,10 +102,16 @@ public class AuthController {
 			Account foundAccount = accountService.findByEmail(login.getEmail());
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this email address.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this email." },
+						HttpStatus.NOT_FOUND);
 
-			if (!BCrypt.checkpw(login.getPassword(), foundAccount.getPassword()))
-				return new ResponseEntity<>("There isn't an account with this password.", HttpStatus.NOT_FOUND);
+			AES256TextEncryptor aesEncryptor = new AES256TextEncryptor();
+			aesEncryptor.setPassword(aesKey);
+			String decryptedPassword = aesEncryptor.decrypt(foundAccount.getPassword());
+
+			if (!login.getPassword().equals(decryptedPassword))
+				return new ResponseEntity<>(new String[] { "There isn't an account with this password." },
+						HttpStatus.NOT_FOUND);
 
 			Set<SimpleGrantedAuthority> authorities = accountService.getAuthority(foundAccount);
 			UserDetails userDetails = new User(foundAccount.getId().toString(), foundAccount.getPassword(),
@@ -93,9 +120,15 @@ public class AuthController {
 			String username = jwtTokenUtil.getUsernameFromToken(token);
 			Date expiration = jwtTokenUtil.getExpirationDateFromToken(token);
 
+			List<String> roles = new ArrayList<String>();
+
+			for (Role role : foundAccount.getRoles())
+				roles.add(role.getName());
+
 			TokenModel newToken = new TokenModel();
 			newToken.setToken(token);
 			newToken.setUsername(username);
+			newToken.setRoles(roles);
 			newToken.setExpiration(expiration);
 
 			return new ResponseEntity<>(newToken, HttpStatus.OK);
@@ -125,7 +158,8 @@ public class AuthController {
 			CompanyModel company = register.getCompany();
 
 			Company newCompany = companyService.create(company.getCompany());
-			Account account = new Account(newCompany.getId(), username, newCompany.getEmail(), password, newCompany.getPhone());
+			Account account = new Account(newCompany.getId(), username, newCompany.getEmail(), password,
+					newCompany.getPhone());
 			Account newAccount = accountService.create(account);
 			Set<Role> setNewRole = new HashSet<Role>();
 
@@ -176,12 +210,14 @@ public class AuthController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Company foundCompany = companyService.findById(foundAccount.getCompany_id());
 
 			if (foundCompany == null)
-				return new ResponseEntity<>("There isn't a company with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a company with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Account newAccount = accountService.create(account.getAccount(foundAccount.getCompany_id()));
 			Set<Role> setNewRole = new HashSet<Role>();
@@ -212,14 +248,23 @@ public class AuthController {
 	 * @return account profile
 	 */
 	@GetMapping("/account_profile")
-	public ResponseEntity<Object> account_profile(Authentication authentication) {
+	public ResponseEntity<Object> account_profile(
+			@RequestParam(required = false, name = "decrypt_aes_key") String decrypt_aes_key,
+			Authentication authentication) {
 		Long id = Long.parseLong(authentication.getName());
 
 		try {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
+
+			if (aesKey.equals(decrypt_aes_key)) {
+				AES256TextEncryptor aesEncryptor = new AES256TextEncryptor();
+				aesEncryptor.setPassword(decrypt_aes_key);
+				foundAccount.setPassword(aesEncryptor.decrypt(foundAccount.getPassword()));
+			}
 
 			return new ResponseEntity<>(foundAccount, HttpStatus.OK);
 		} catch (Exception ex) {
@@ -242,12 +287,14 @@ public class AuthController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Company foundCompany = companyService.findById(foundAccount.getCompany_id());
 
 			if (foundCompany == null)
-				return new ResponseEntity<>("There isn't a company with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a company with this id." },
+						HttpStatus.NOT_FOUND);
 
 			HashMap<String, Object> result = new HashMap<String, Object>();
 			result.put("account", foundAccount);
@@ -280,7 +327,8 @@ public class AuthController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			for (Role role : foundAccount.getRoles()) {
 				Integer existRole = account.getRoles().indexOf(role.getName());
@@ -345,7 +393,8 @@ public class AuthController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Company updatedCompany = companyService.update(foundAccount.getCompany_id(), company.getCompany());
 
@@ -374,13 +423,15 @@ public class AuthController {
 			Account foundAccount = accountService.findById(account_id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			if (id.equals(account_id)) {
 				Company foundCompany = companyService.findById(foundAccount.getCompany_id());
 
 				if (foundCompany == null)
-					return new ResponseEntity<>("There isn't a company with this id.", HttpStatus.NOT_FOUND);
+					return new ResponseEntity<>(new String[] { "There isn't a company with this id." },
+							HttpStatus.NOT_FOUND);
 
 				List<Account> accounts = accountService.selectByCompanyId(foundCompany.getId());
 
@@ -391,9 +442,28 @@ public class AuthController {
 					accountService.deleteByCompanyId(account.getCompany_id());
 				}
 
+				List<Project> foundProjects = projectService.selectByCompanyId(foundCompany.getId());
+
+				for (Project project : foundProjects) {
+					List<Sprint> foundSprints = sprintService.selectByProjectId(project.getId());
+
+					for (Sprint sprint : foundSprints) {
+						List<Task> foundTasks = taskService.selectByProjectIdAndSprintId(project.getId(),
+								sprint.getId());
+
+						for (Task task : foundTasks)
+							taskService.deleteById(task.getId());
+
+						sprintService.deleteById(sprint.getId());
+					}
+
+					projectService.deleteById(project.getId());
+				}
+
 				companyService.delete(foundCompany);
 
-				return new ResponseEntity<>("Your account has been deleted.Your company profile has been deleted.",
+				return new ResponseEntity<>(
+						new String[] { "Your account has been deleted.Your company profile has been deleted." },
 						HttpStatus.OK);
 			} else {
 				for (Role role : foundAccount.getRoles())
@@ -401,7 +471,7 @@ public class AuthController {
 
 				accountService.delete(foundAccount);
 
-				return new ResponseEntity<>("This account has been deleted.", HttpStatus.OK);
+				return new ResponseEntity<>(new String[] { "Your account has been deleted." }, HttpStatus.OK);
 			}
 		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);

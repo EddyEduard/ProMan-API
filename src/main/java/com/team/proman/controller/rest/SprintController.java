@@ -25,9 +25,11 @@ import com.team.proman.model.SprintModel;
 import com.team.proman.model.db.Account;
 import com.team.proman.model.db.Project;
 import com.team.proman.model.db.Sprint;
+import com.team.proman.model.db.Task;
 import com.team.proman.services.AccountService;
 import com.team.proman.services.ProjectService;
 import com.team.proman.services.SprintService;
+import com.team.proman.services.TaskService;
 
 @RestController
 @RequestMapping("/api/sprint")
@@ -40,6 +42,9 @@ public class SprintController {
 
 	@Autowired
 	private SprintService sprintService;
+
+	@Autowired
+	private TaskService taskService;
 
 	/**
 	 * Get all sprints.
@@ -56,7 +61,8 @@ public class SprintController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			List<Sprint> sprints = sprintService.selectByProjectId(projectId);
 
@@ -83,12 +89,14 @@ public class SprintController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Project foundProject = projectService.findById(projectId);
 
 			if (foundProject == null)
-				return new ResponseEntity<>("There isn't a project with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a project with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Sprint sprint = sprintService.findByProjectIdAndSprintId(projectId, sprintId);
 
@@ -121,7 +129,8 @@ public class SprintController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Sprint createdSprint = sprintService
 					.create(sprint.getSprint(foundAccount.getCompany_id(), new Date(), new Date()));
@@ -156,12 +165,14 @@ public class SprintController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Sprint foundSprint = sprintService.findById(sprintId);
 
 			if (foundSprint == null)
-				return new ResponseEntity<>("There isn't a sprint with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a sprint with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Sprint updatedSprint = sprintService.update(sprintId,
 					sprint.getSprint(foundAccount.getCompany_id(), foundSprint.getCreated_date(), new Date()));
@@ -188,16 +199,24 @@ public class SprintController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Sprint foundSprint = sprintService.findById(sprintId);
 
 			if (foundSprint == null)
-				return new ResponseEntity<>("There isn't a sprint with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a sprint with this id." },
+						HttpStatus.NOT_FOUND);
+
+			List<Task> foundTasks = taskService.selectByProjectIdAndSprintId(foundSprint.getProject_id(),
+					foundSprint.getId());
+
+			for (Task task : foundTasks)
+				taskService.deleteById(task.getId());
 
 			sprintService.deleteById(sprintId);
 
-			return new ResponseEntity<>("Delete sprint successfully.", HttpStatus.OK);
+			return new ResponseEntity<>(new String[] { "Delete sprint successfully." }, HttpStatus.OK);
 		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
 		}

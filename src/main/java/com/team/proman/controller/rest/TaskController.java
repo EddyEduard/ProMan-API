@@ -63,7 +63,8 @@ public class TaskController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			List<Task> tasks = taskService.selectByProjectIdAndSprintId(projectId, sprintId);
 
@@ -91,17 +92,20 @@ public class TaskController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Project foundProject = projectService.findById(projectId);
 
 			if (foundProject == null)
-				return new ResponseEntity<>("There isn't a project with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a project with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Sprint foundSprint = sprintService.findById(sprintId);
 
 			if (foundSprint == null)
-				return new ResponseEntity<>("There isn't a project with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a project with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Task task = taskService.findByProjectIdAndSprintIdAndTaskId(projectId, sprintId, taskId);
 
@@ -134,10 +138,11 @@ public class TaskController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Task createdTask = taskService
-					.create(task.getTask(foundAccount.getCompany_id(), Status.CREATED, new Date(), new Date()));
+					.create(task.getTask(foundAccount.getCompany_id(), Status.TODO, new Date(), new Date()));
 
 			return new ResponseEntity<>(createdTask, HttpStatus.OK);
 		} catch (Exception ex) {
@@ -169,12 +174,13 @@ public class TaskController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Task foundTask = taskService.findById(taskId);
 
 			if (foundTask == null)
-				return new ResponseEntity<>("There isn't a task with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a task with this id." }, HttpStatus.NOT_FOUND);
 
 			Task updatedTask = taskService.update(taskId, task.getTask(foundAccount.getCompany_id(), task.getStatus(),
 					foundTask.getCreated_date(), new Date()));
@@ -201,16 +207,17 @@ public class TaskController {
 			Account foundAccount = accountService.findById(id);
 
 			if (foundAccount == null)
-				return new ResponseEntity<>("There isn't an account with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't an account with this id." },
+						HttpStatus.NOT_FOUND);
 
 			Task foundTask = taskService.findById(taskId);
 
 			if (foundTask == null)
-				return new ResponseEntity<>("There isn't a task with this id.", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>(new String[] { "There isn't a task with this id." }, HttpStatus.NOT_FOUND);
 
 			taskService.deleteById(taskId);
 
-			return new ResponseEntity<>("Delete task successfully.", HttpStatus.OK);
+			return new ResponseEntity<>(new String[] { "Delete task successfully." }, HttpStatus.OK);
 		} catch (Exception ex) {
 			return new ResponseEntity<>(ex, HttpStatus.BAD_REQUEST);
 		}
