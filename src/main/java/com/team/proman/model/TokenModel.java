@@ -1,11 +1,14 @@
 package com.team.proman.model;
 
 import java.util.Date;
+import java.util.List;
 
 public class TokenModel {
 	private String token;
 	
 	private String username;
+	
+	private List<String> roles;
 	
 	private Date expiration;
 	
@@ -35,6 +38,20 @@ public class TokenModel {
 	 */
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	/**
+	 * @return the roles
+	 */
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * @param roles the roles to set
+	 */
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
 	}
 
 	/**
