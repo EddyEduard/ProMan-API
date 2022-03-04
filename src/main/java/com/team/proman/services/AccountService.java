@@ -6,12 +6,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.jasypt.util.text.AES256TextEncryptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import com.team.proman.model.db.Account;
@@ -21,6 +22,9 @@ import com.team.proman.repositories.AccountRepository;
 public class AccountService implements UserDetailsService {
 
 	private final AccountRepository accountRepository;
+	
+	@Value("${aes.key}")
+	private String aesKey;
 
 	/**
 	 * @param accountRepository
@@ -127,7 +131,9 @@ public class AccountService implements UserDetailsService {
 	 * @return created account
 	 */
 	public Account create(Account account) {
-		account.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()));
+		AES256TextEncryptor aesEncryptor = new AES256TextEncryptor();
+	    aesEncryptor.setPassword(aesKey);
+	    account.setPassword(aesEncryptor.encrypt(account.getPassword()));
 		return accountRepository.save(account);
 	}
 
@@ -144,8 +150,9 @@ public class AccountService implements UserDetailsService {
 		foundAccount.setEmail(account.getEmail());
 		foundAccount.setPhone(account.getPhone());
 
-		if (!BCrypt.checkpw(account.getPassword(), foundAccount.getPassword()))
-			foundAccount.setPassword(BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()));
+		AES256TextEncryptor aesEncryptor = new AES256TextEncryptor();
+	    aesEncryptor.setPassword(aesKey);
+	    foundAccount.setPassword(aesEncryptor.encrypt(account.getPassword()));
 
 		return accountRepository.save(foundAccount);
 	}
