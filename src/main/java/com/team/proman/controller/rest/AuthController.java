@@ -433,9 +433,9 @@ public class AuthController {
 					return new ResponseEntity<>(new String[] { "There isn't a company with this id." },
 							HttpStatus.NOT_FOUND);
 
-				List<Account> accounts = accountService.selectByCompanyId(foundCompany.getId());
+				List<Account> foundAccounts = accountService.selectByCompanyId(foundCompany.getId());
 
-				for (Account account : accounts) {
+				for (Account account : foundAccounts) {
 					for (Role role : account.getRoles())
 						accountRoleService.deleteByAccountIdAndRoleId(account.getId(), role.getId());
 
