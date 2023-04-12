@@ -2,6 +2,21 @@
 ProMan is an application for managing projects.
 All the roots from the REST API are described below.
 
+## Technologies
+
+Below is a list of all the technologies used to develop the app. They are structured by categories.
+     
+**Backend**
+   - Java
+   - Spring
+     
+**Database**
+   - MySQL 
+
+## REST API routes
+
+Below is a list of all REST API routes.
+
 ##### Auth
 
 1. Register for company 
@@ -287,3 +302,11 @@ All the roots from the REST API are described below.
 *Authorization role: ADMIN, DIRECTOR, MANAGER*
 
 > /api/task/delete/{id}
+
+## License
+Distributed under the MIT License. See [MIT](https://github.com/EddyEduard/ProMan-API/blob/master/LICENSE) for more information.
+
+## Contact
+Eduard-Nicolae - [eduard_nicolae@yahoo.com](mailTo:eduard_nicolae@yahoo.com)
+\
+Project link - [https://github.com/EddyEduard/ProMan-API](https://github.com/EddyEduard/ProMan-API.git)
