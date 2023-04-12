@@ -1,6 +1,5 @@
 # ProMan
-ProMan is an application for managing projects.
-All the roots from the REST API are described below.
+ProMan is a project management application. It allows users to manage their projects, sprints and tasks.Tasks can be scheduled and prioritized according to the level of difficulty or time. All the roots from the REST API are described below.
 
 ## Technologies
 
