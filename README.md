@@ -5,6 +5,9 @@ ProMan is a project management application. It allows users to manage their proj
 
 Below is a list of all the technologies used to develop the app. They are structured by categories.
      
+**Frontend**
+   - [https://github.com/EddyEduard/ProMan](https://github.com/EddyEduard/ProMan.git)
+     
 **Backend**
    - Java
    - Spring
