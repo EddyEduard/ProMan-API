@@ -305,6 +305,74 @@ Below is a list of all REST API routes.
 
 > /api/task/delete/{id}
 
+## System Diagram
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    COMPANY {
+        long id PK
+        srring name
+        string email
+        string(10) phone
+        string industry
+	string country
+	string city
+	string address
+    }
+    ACCOUNT {
+        long id PK
+        long company_id FK
+        string username
+        string email
+        string(10) phone
+        string(6) password
+    }
+    ACCOUNT_ROLE {
+        long id PK
+        long account_id FK
+	long role_id FK
+    }
+    ROLE {
+        long id PK
+        string name
+	string description
+    }
+    PROJECT {
+        long id PK
+        long company_id FK
+        string name
+	string description
+	date created_date
+	date updated_date
+    }
+    SPRINT {
+        long id PK
+        long company_id FK
+        long project_id FK
+        string name
+	string description
+	enum priority
+	date created_date
+	date updated_date
+    }
+    TASK {
+        long id PK
+        long company_id FK
+        long project_id FK
+        long sprint_id FK
+        string name
+	string description
+	enum priority
+	enum status
+	date created_date
+	date updated_date
+    }
+```
+
+### Use case diagrams
+
 ## License
 Distributed under the MIT License. See [MIT](https://github.com/EddyEduard/ProMan-API/blob/master/LICENSE) for more information.
 
