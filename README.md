@@ -369,9 +369,60 @@ erDiagram
 	date created_date
 	date updated_date
     }
+
+    COMPANY ||--o{ ACCOUNT : "has accounts"
+    ACCOUNT ||--|{ ACCOUNT_ROLE : "has roles"
+    ACCOUNT_ROLE }|--|| ROLE : "has accounts"
+    COMPANY ||--o{ PROJECT : "has projects"
+    COMPANY ||--o{ SPRINT : "has sprints"
+    COMPANY ||--o{ TASK : "has tasks"
+    PROJECT ||--o{ SPRINT : "has sprints"
+    PROJECT ||--o{ TASK : "has tasks"
+    SPRINT ||--o{ TASK : "has tasks"
 ```
 
 ### Use case diagrams
+
+```mermaid
+flowchart LR
+    admin((ADMIN))
+    director((DIRECTOR))
+    manager((MANAGER))
+    specialist((SPECIALIST))
+
+    caseOne([User login])
+    caseTwo([User registration])
+    caseThree([Managing company and user accounts])
+    caseFour([Managing projects])
+    caseFive([Managing sprints])
+    caseSix([Managing tasks])
+    caseSeven([Update task])
+
+    admin --> caseOne
+    admin --> caseTwo
+    admin --> caseThree
+    admin --> caseFour
+    admin --> caseFive
+    admin --> caseSix
+
+    director --> caseOne
+    director --> caseFour
+    director --> caseFive
+    director --> caseSix
+
+    manager --> caseOne
+    manager --> caseFour
+    manager --> caseFive
+    manager --> caseSix
+
+    specialist --> caseOne
+    specialist --> caseSeven
+
+    style admin fill:#ff0000,color:white
+    style director fill:#3498db,color:white
+    style manager fill:#f39c12,color:white 
+    style specialist fill:#1abc9c,color:white
+```
 
 ## License
 Distributed under the MIT License. See [MIT](https://github.com/EddyEduard/ProMan-API/blob/master/LICENSE) for more information.
